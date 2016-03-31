@@ -25,6 +25,73 @@ php artisan vendor:publish --provider="SouhailMerroun\Schedulable\SchedulableSer
 php artisan migrate
 ```
 
+### Setup your models, 
+##### Example : Scheduling tasks.
+
+
+```php
+...
+use SouhailMerroun\Schedulable\SchedulableTrait;
+
+class Task extends Model {
+	use SchedulableTrait;
+}
+```
+
+### Sample Usage
+#### Scheduling definition : Is where you put the definition of the schedule, for e.g i want this task to get repeated every day
+
+##### Schedule every day 
+
+```php
+$task->scheduleOnce();
+```
+
+##### Schedule once 
+
+```php
+//The datetime must be a carbon instance
+$datetime = Carbon::create('2016', '03', '31', '17', '30'); //2016-03-31 17:30
+
+
+$task->scheduleOnce($datetime, $user_id);
+
+//or
+
+$task->scheduleOnce($datetime);
+
+//or
+
+$task->scheduleOnce(); //Take current datetime as default value
+```
+
+#### Scheduling data : Is where you get all your schedulings for a model
+
+##### Get all schedules
+
+```php
+$task->schedules()->get(); //Return a collection of tasks
+
+$task->schedules()->paginate(20); //Return with pagination
+```
+
+##### Get all pending schedules
+
+```php
+$task->getPendingSchedules(); //Return a collection of task schedules that are still waiting for action
+```
+
+##### Get all accomplished schedules
+
+```php
+$task->getAccomplishedSchedules(); //Return a collection of accomplished task schedules that are completed
+```
+
+##### Get all aborted schedules
+
+```php
+$task->getAbortedSchedules(); //Return a collection of aborted task schedules that are aborted
+```
 
 #### Credits
 

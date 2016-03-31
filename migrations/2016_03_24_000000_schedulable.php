@@ -30,7 +30,7 @@ class Schedulable extends Migration
             $table->date('end_at')->nullable();
             /* -- Used for type 1 or 2 -- */
             
-            $table->date('time')->nullable(); //Used the specified if the time is fixed
+            $table->time('time')->nullable(); //Used the specified if the time is fixed
             
             $table->boolean('monday')->nullable();
             $table->boolean('tuesday')->nullable();
@@ -95,9 +95,9 @@ class Schedulable extends Migration
             $table->foreign('user_id')->references('id')->on('users');
 			$table->integer('schedule_id')->unsigned();
             $table->foreign('schedule_id')->references('id')->on('schedules');
-            $table->datetime('state')->nullable(); //-1 Abandonned, 1 accomplished
+            $table->boolean('state')->nullable(); //-1 Aborted, 1 accomplished
             $table->date('for_date')->nullable();
-            $table->date('for_time')->nullable();
+            $table->time('for_time')->nullable();
             $table->date('ended_at')->nullable(); // Store the date if abandonned or accomplished 
 			$table->timestamps();
 		});

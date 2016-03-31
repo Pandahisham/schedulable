@@ -4,11 +4,12 @@ namespace SouhailMerroun\Schedulable;
 use SouhailMerroun\Schedulable\Schedule;
 use DB;
 
-trait Schedulable
+trait SchedulableTrait
 {
     use Schedulable_Relations;
     use Definings;
-    use Scheduling;   
+    use Scheduling;
+    use Data;    
     
     public static function GetWithNoSchedulings()
     {
