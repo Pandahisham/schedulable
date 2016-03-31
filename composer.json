@@ -3,6 +3,7 @@
     "description": "Schedule anything, with specific choosing reapeated dates and/or times",
     "keywords": ["scheduling","schedule", "laravel", "php"],
     "homepage": "https://github.com/souhailmerroun/schedulable",
+    "license": "MIT",
     "authors": [
         {
             "name": "Souhail Merroun",

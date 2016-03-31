@@ -8,15 +8,19 @@ trait Scheduling
         
     }
     
-    public function accomplish()
+    public function accomplishSchedule()
 	{
         //Change state to 1
-        dd($this);
+        
+
+        $this->nextSchedule();
 	}
     
-    public function abandon()
+    public function abortSchedule()
     {
         //Change state to -1
+
+        $this->nextSchedule();
     }
 }
 

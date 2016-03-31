@@ -13,8 +13,6 @@ class SchedulableServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        // php artisan vendor:publish --provider="SouhailMerroun\Schedulable\SchedulableServiceProvider" --tag=migrations
-        
         $this->publishes([
 			realpath(__DIR__.'/../migrations') => database_path('migrations')
 		], 'migrations');

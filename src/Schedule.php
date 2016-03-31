@@ -6,8 +6,6 @@ use Auth;
 
 class Schedule extends Eloquent
 {
-    protected $table = "schedules";
-    
     protected $fillable = [
         'schedulable_id',
         'state', 

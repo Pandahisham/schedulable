@@ -8,7 +8,7 @@ Trait for Laravel Eloquent models to allow easy implementation of scheduling fea
 
 ### Composer Install (for Laravel 5.2)
 
-    composer require souhailmerroun/schedulable "dev-master"
+    composer require souhailmerroun/schedulable "1.0.0"
 
 ### Install and then run the migrations
 
@@ -19,6 +19,12 @@ Trait for Laravel Eloquent models to allow easy implementation of scheduling fea
     ...
 ],
 ```
+
+```bash
+php artisan vendor:publish --provider="SouhailMerroun\Schedulable\SchedulableServiceProvider" --tag=migrations
+php artisan migrate
+```
+
 
 #### Credits
 
