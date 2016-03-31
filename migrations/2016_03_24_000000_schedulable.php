@@ -17,7 +17,7 @@ class Schedulable extends Migration
 			$table->increments('id');
 			$table->integer('schedulable_id')->unsigned();
 			$table->string('schedulable_type');
-			$table->integer('user_id')->unsigned();
+			$table->integer('user_id')->unsigned()->nullable();
                         
             $table->integer('type')->unsigned(); //0 once, 1 every day of the week, 2 every day of the month
             
@@ -91,7 +91,7 @@ class Schedulable extends Migration
         Schema::create('schedules', function(Blueprint $table) {
 			$table->increments('id');
             $table->integer('schedulable_id')->unsigned();
-            $table->integer('user_id')->unsigned();
+            $table->integer('user_id')->unsigned()->nullable();
             $table->foreign('user_id')->references('id')->on('users');
 			$table->integer('schedule_id')->unsigned();
             $table->foreign('schedule_id')->references('id')->on('schedules');
@@ -111,5 +111,6 @@ class Schedulable extends Migration
     public function down()
     {
         Schema::drop('schedules');
+        Schema::drop('schedules_definitions');
     }
 }

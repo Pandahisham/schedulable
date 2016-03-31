@@ -9,7 +9,7 @@ class Schedule_Definition extends Eloquent
     protected $table = 'schedules_definitions';
     
     protected $fillable = [
-		'schedulable_id', 'schedulable_type', 'user_id', 'types', 'date','start_at', 'end_at', 'time',
+		'schedulable_id', 'schedulable_type', 'user_id', 'type', 'date','start_at', 'end_at', 'time',
 
         'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
             

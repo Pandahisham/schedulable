@@ -41,28 +41,78 @@ class Task extends Model {
 ### Sample Usage
 #### Scheduling definition : Is where you put the definition of the schedule, for e.g i want this task to get repeated every day
 
-##### Schedule every day 
-
+##### Schedule once 
 ```php
-$task->scheduleOnce();
+$date_time = Carbon::create('2016', '03', '31', '17', '30'); //2016-03-31 17:30
+$date = Carbon::create('2016', '04', '31'); 
+
+$date_time = Carbon::create('2016', '03', '31', '17', '30'); //2016-03-31 17:30
+        
+//With date & time
+$task->scheduleOnce($date_time->format('Y-m-d'), $date_time->format('H:i'));
+
+//With date & time & user_id
+$task->scheduleOnce($date_time->format('Y-m-d'), $date_time->format('H:i'), 3);
+
+//With date & user_id
+$task->scheduleOnce($date_time->format('Y-m-d'), null, 3);
 ```
 
-##### Schedule once 
-
+##### Schedule every day 
 ```php
-//The datetime must be a carbon instance
-$datetime = Carbon::create('2016', '03', '31', '17', '30'); //2016-03-31 17:30
+//With startDate, time, endDate, user_id
+$task->scheduleEveryDay('2016-03-31', '18:00', '2016-04-30', 3);
+
+//With startDate, time, user_id
+$task->scheduleEveryDay('2016-03-31', null , '2016-04-30', 3);
+
+//With startDate, user_id
+$task->scheduleEveryDay('2016-03-31', null, null, 3);
+
+//With startDate
+$task->scheduleEveryDay('2016-03-31', null, null, null);
+```
+
+##### Schedule every giving day of the week
+```php
+//Choose days you want
+$days = collect(['monday','tuesday','wednesday','thursday','friday','saturday','sunday']);
+
+//Or ...
+
+$days = collect(['saturday','sunday']);
+
+//With startDate, time, endDate, user_id
+$task->scheduleEveryGivingDayOfTheWeek('2016-03-31', '18:00', '2016-04-30', 3, $days);
+
+//With startDate, time, user_id
+$task->scheduleEveryGivingDayOfTheWeek('2016-03-31', null , '2016-04-30', 3, $days);
+
+//With startDate, user_id
+$task->scheduleEveryGivingDayOfTheWeek('2016-03-31', null, null, 3, $days);
+
+//With startDate
+$task->scheduleEveryGivingDayOfTheWeek('2016-03-31', null, null, null, $days);
+```
+
+##### Schedule every giving day of the month
+```php
+//Choose months and days you want
+$months = collect(['january','march','april','june','september','november']);
+$days = collect([1, 15]);
 
 
-$task->scheduleOnce($datetime, $user_id);
+//With startDate, time, endDate, user_id
+$task->scheduleEveryGivingDayOfTheMonth('2016-03-31', '18:00', '2016-04-30', 3, $days);
 
-//or
+//With startDate, time, user_id
+$task->scheduleEveryGivingDayOfTheMonth('2016-03-31', null , '2016-04-30', 3, $days);
 
-$task->scheduleOnce($datetime);
+//With startDate, user_id
+$task->scheduleEveryGivingDayOfTheMonth('2016-03-31', null, null, 3, $days);
 
-//or
-
-$task->scheduleOnce(); //Take current datetime as default value
+//With startDate
+$task->scheduleEveryGivingDayOfTheMonth('2016-03-31', null, null, null, $days);
 ```
 
 #### Scheduling data : Is where you get all your schedulings for a model
