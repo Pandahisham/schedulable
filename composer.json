@@ -1,0 +1,18 @@
+{
+    "name": "souhailmerroun/schedulable",
+    "description": "Schedule anything, with specific choosing reapeated dates and/or times",
+    "keywords": ["scheduling","schedule", "laravel", "php"],
+    "homepage": "https://github.com/souhailmerroun/schedulable",
+    "authors": [
+        {
+            "name": "Souhail Merroun",
+            "email": "contact@souhailmerroun.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "SouhailMerroun\\Schedulable\\": "src/"
+        }
+    }
+}
