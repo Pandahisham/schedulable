@@ -55,7 +55,7 @@ trait Definings
         $schedule_definition->schedules()->save($schedule);
     }
     
-    public function scheduleEveryGivingDayOfTheWeek($startDate , $time = null , $endDate = null, $userId = null, Collection $days)
+    public function scheduleEveryGivingDayOfTheWeek($startDate , $time = null , $endDate = null, Collection $days, $userId = null)
     {
         $monday = false;
         $tuesday = false;
@@ -106,7 +106,7 @@ trait Definings
         $schedule_definition->schedules()->save($schedule);
     }
     
-    public function scheduleEveryGivingDayOfTheMonth($startDate , $time = null , $endDate = null, $userId = null, Collection $days, Collection $months)
+    public function scheduleEveryGivingDayOfTheMonth($startDate , $time = null , $endDate = null, Collection $months, Collection $days, $userId = null)
     {
         $january = false;
         $february = false;
@@ -243,7 +243,7 @@ trait Definings
             
         $schedule_definition = new Schedule_Definition([
             'schedulable_id' => $this->id,
-            'type' => 2,
+            'type' => 3,
             'start_at' => $startDate,
             'end_at' => $endDate,
             'time' => $time,
