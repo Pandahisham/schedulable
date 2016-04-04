@@ -13,6 +13,17 @@ trait Schedulable_Relations
     
     public function schedules()
 	{
-		return $this->hasMany(Schedule::class, 'schedulable_id' ,'id');
+		return $this->morphMany(Schedule::class, 'schedulable');
 	}
+    
+    public static function boot()
+    {
+        parent::boot();
+    
+        static::deleted(function($task)
+        {
+            $task->schedules()->delete();
+            $task->schedule_definition()->delete();
+        });
+    } 
 }

@@ -14,23 +14,17 @@ class Schedulable extends Migration
     {
         //The schedules
         Schema::create('schedules_definitions', function(Blueprint $table) {
-			$table->increments('id');
-			$table->integer('schedulable_id')->unsigned();
-			$table->string('schedulable_type');
-			$table->integer('user_id')->unsigned()->nullable();
-                        
+            $table->increments('id');
+            $table->integer('schedulable_id')->unsigned();
+            $table->string('schedulable_type');
+            $table->integer('user_id')->unsigned()->nullable();
+	                        
             $table->integer('type')->unsigned(); //0 once, 1 every day of the week, 2 every day of the month
             
-            /* -- Used only for type 0 -- */
             $table->date('date')->nullable();
-            /* Used for type 0 */
-            
-            /* -- Used for type 1 or 2 -- */
             $table->date('start_at')->nullable();
             $table->date('end_at')->nullable();
-            /* -- Used for type 1 or 2 -- */
-            
-            $table->time('time')->nullable(); //Used the specified if the time is fixed
+            $table->time('time')->nullable(); 
             
             $table->boolean('monday')->nullable();
             $table->boolean('tuesday')->nullable();
@@ -84,22 +78,24 @@ class Schedulable extends Migration
             $table->boolean('day29')->nullable();
             $table->boolean('day30')->nullable();
             $table->boolean('day31')->nullable();
-            
-			$table->timestamps();
+           
+            $table->timestamps();
 		});
         
-        Schema::create('schedules', function(Blueprint $table) {
+        Schema::create('schedules', function(Blueprint $table) { 
 			$table->increments('id');
+            
             $table->integer('schedulable_id')->unsigned();
+            $table->string('schedulable_type');     
+            $table->integer('schedule_definition_id')->unsigned();
             $table->integer('user_id')->unsigned()->nullable();
-            $table->foreign('user_id')->references('id')->on('users');
-			$table->integer('schedule_id')->unsigned();
-            $table->foreign('schedule_id')->references('id')->on('schedules');
+            
             $table->boolean('state')->nullable(); //-1 Aborted, 1 accomplished
             $table->date('for_date')->nullable();
             $table->time('for_time')->nullable();
-            $table->date('ended_at')->nullable(); // Store the date if abandonned or accomplished 
-			$table->timestamps();
+            $table->datetime('ended_at')->nullable(); // Store the date if abandonned or accomplished 
+			
+            $table->timestamps();
 		});
     }
 

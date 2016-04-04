@@ -1,6 +1,9 @@
 <?php
 namespace SouhailMerroun\Schedulable;
 
+use Exception;
+use Carbon\Carbon;
+
 trait Scheduling
 {
     public function firstSchedule($request)
@@ -8,28 +11,25 @@ trait Scheduling
         switch ($request->input('schedule_type')) 
         {
             case 'once':
-                if($request->input('with_time'))
-                    $this->scheduleOnce($request->input('start_at'), $request->input('time')); 
-                else
-                    $this->scheduleOnce($request->input('start_at')); 
+                $time = empty($request->input('time')) ? null : $request->input('time');
+                $start_at = empty($request->input('start_at')) ? null : $request->input('start_at');
+                $this->scheduleOnce($start_at, $time);
             break;
             
             case 'every-day':
+                if(empty($request->input('start_at')))
+                    throw new Exception("Empty start_at field in the request");
             
-                if($request->input('with_time'))
-                    if($request->input('end_at'))
-                        $this->scheduleEveryDay($request->input('start_at'), $request->input('time'), $request->input('end_at'));
-                    else
-                        $this->scheduleEveryDay($request->input('start_at'), $request->input('time'));
-                else
-                    if($request->input('end_at'))
-                        $this->scheduleEveryDay($request->input('start_at'), null, $request->input('end_at'));
-                    else
-                        $this->scheduleEveryDay($request->input('start_at'));
-               
+                $time = empty($request->input('time')) ? null : $request->input('time');
+                $end_at = empty($request->input('end_at')) ? null : $request->input('end_at');
+                
+                $this->scheduleEveryDay($request->input('start_at'), $time, $end_at);               
             break;
                 
             case 'every-giving-day':
+            
+                $time = empty($request->input('time')) ? null : $request->input('time');
+                $end_at = empty($request->input('end_at')) ? null : $request->input('end_at');
             
                 $days = collect();
                 $days_list = array(
@@ -38,20 +38,13 @@ trait Scheduling
                 foreach ($days_list as $day) 
                     $days->push($request->input($day));
 
-                if($request->input('with_time'))
-                    if($request->input('end_at'))
-                        $this->scheduleEveryGivingDayOfTheWeek($request->input('start_at'), $request->input('time'), $request->input('end_at'), $days);
-                    else
-                        $this->scheduleEveryGivingDayOfTheWeek($request->input('start_at'), $request->input('time'), null, $days);
-                else
-                    if($request->input('end_at'))
-                        $this->scheduleEveryGivingDayOfTheWeek($request->input('start_at'), null, $request->input('end_at'), $days);
-                    else
-                        $this->scheduleEveryGivingDayOfTheWeek($request->input('start_at'), null, null, $days);
-                
+                $this->scheduleEveryGivingDayOfTheWeek($request->input('start_at'), $time, $end_at, $days);
             break;
                 
             case 'every-giving-day-month':
+            
+                $time = empty($request->input('time')) ? null : $request->input('time');
+                $end_at = empty($request->input('end_at')) ? null : $request->input('end_at');
             
                 $months = collect();
                 $months_list = array(
@@ -67,37 +60,150 @@ trait Scheduling
                 foreach($days_list as $day) 
                     $days->push($request->input($day));
                 
-                if($request->input('with_time'))
-                    if($request->input('end_at'))
-                        $this->scheduleEveryGivingDayOfTheMonth($request->input('start_at'), $request->input('time'), $request->input('end_at'), $months, $days);
-                    else
-                        $this->scheduleEveryGivingDayOfTheMonth($request->input('start_at'), $request->input('time'), null, $months, $days);
-                else
-                    if($request->input('end_at'))
-                        $this->scheduleEveryGivingDayOfTheMonth($request->input('start_at'), null, $request->input('end_at'), $months ,$days);
-                    else
-                        $this->scheduleEveryGivingDayOfTheMonth($request->input('start_at'), null, null, $months, $days);
+                $this->scheduleEveryGivingDayOfTheMonth($request->input('start_at'), $time, $end_at, $months, $days);
             break;
         }
     }
     
     public function nextSchedule()
     {
+        $schedule_definition = Schedule_Definition::where('schedulable_id', $this->id)->first();
         
+        switch ($schedule_definition->type) 
+        {
+            //Once schedules
+            case 0:
+            break;
+            
+            //Everyday schedules
+            case 1:
+                $time = empty($schedule_definition->time) ? null : $schedule_definition->time;
+                $end_at = empty($schedule_definition->end_at) ? null : $schedule_definition->end_at;
+                $last_schedule = Schedule::orderBy('ended_at', 'desc')->first();
+                
+                if($end_at != null && !Carbon::parse($end_at)->isToday())
+                {
+                    $schedule = new Schedule([
+                        'schedulable_id' => $this->id,
+                        'schedule_definition_id' => $schedule_definition->id,
+                        'for_date' => Carbon::parse($last_schedule->for_date)->addDay(),
+                        'user_id' => $schedule_definition->user_id,
+                        'for_time' => $time
+                    ]);
+                    $this->schedules()->save($schedule);
+                }
+                else
+                {
+                    $schedule = new Schedule([
+                        'schedulable_id' => $this->id,
+                        'schedule_definition_id' => $schedule_definition->id,
+                        'for_date' => Carbon::parse($last_schedule->for_date)->addDay(),
+                        'user_id' => $schedule_definition->user_id,
+                        'for_time' => $time
+                    ]);
+                    $this->schedules()->save($schedule);
+                }
+            break;
+                
+            //Every giving day of the week
+            case 2:
+                $time = empty($schedule_definition->time) ? null : $schedule_definition->time;
+                $end_at = empty($schedule_definition->end_at) ? null : $schedule_definition->end_at;
+                $last_schedule = Schedule::orderBy('ended_at', 'desc')->first();
+                
+                /* Get the closest day in the schedule definition */
+                $closestDay;
+                
+                if($schedule_definition->monday == 1)
+                    $closestDay[Carbon::MONDAY] = Carbon::parse($last_schedule->for_date)->diffInDays(Carbon::parse($last_schedule->for_date)->next(Carbon::MONDAY));
+                    
+                if($schedule_definition->tuesday == 1)
+                    $closestDay[Carbon::TUESDAY] = Carbon::parse($last_schedule->for_date)->diffInDays(Carbon::parse($last_schedule->for_date)->next(Carbon::TUESDAY));
+                    
+                if($schedule_definition->wednesday == 1)
+                    $closestDay[Carbon::WEDNESDAY] = Carbon::parse($last_schedule->for_date)->diffInDays(Carbon::parse($last_schedule->for_date)->next(Carbon::WEDNESDAY));
+                 
+                if($schedule_definition->thursday == 1)
+                    $closestDay[Carbon::THURSDAY] = Carbon::parse($last_schedule->for_date)->diffInDays(Carbon::parse($last_schedule->for_date)->next(Carbon::THURSDAY));
+                    
+                if($schedule_definition->friday == 1)
+                    $closestDay[Carbon::FRIDAY] = Carbon::parse($last_schedule->for_date)->diffInDays(Carbon::parse($last_schedule->for_date)->next(Carbon::FRIDAY));
+                    
+                if($schedule_definition->saturday == 1)  
+                    $closestDay[Carbon::SATURDAY] = Carbon::parse($last_schedule->for_date)->diffInDays(Carbon::parse($last_schedule->for_date)->next(Carbon::SATURDAY));
+                
+                if($schedule_definition->sunday == 1)
+                     $closestDay[Carbon::SUNDAY] = Carbon::parse($last_schedule->for_date)->diffInDays(Carbon::parse($last_schedule->for_date)->next(Carbon::SUNDAY));
+                     
+                /* Use the closest day for the next schedule */     
+                if(array_keys($closestDay, min($closestDay))[0] == Carbon::MONDAY)
+                    $nextSchedule = Carbon::parse($last_schedule->for_date)->next(Carbon::MONDAY);
+                
+                if(array_keys($closestDay, min($closestDay))[0] == Carbon::TUESDAY)
+                    $nextSchedule = Carbon::parse($last_schedule->for_date)->next(Carbon::TUESDAY);
+                
+                if(array_keys($closestDay, min($closestDay))[0] == Carbon::WEDNESDAY)
+                    $nextSchedule = Carbon::parse($last_schedule->for_date)->next(Carbon::WEDNESDAY);
+                
+                if(array_keys($closestDay, min($closestDay))[0] == Carbon::THURSDAY)
+                    $nextSchedule = Carbon::parse($last_schedule->for_date)->next(Carbon::THURSDAY);
+                    
+                if(array_keys($closestDay, min($closestDay))[0] == Carbon::FRIDAY)
+                    $nextSchedule = Carbon::parse($last_schedule->for_date)->next(Carbon::FRIDAY);
+                    
+                if(array_keys($closestDay, min($closestDay))[0] == Carbon::SATURDAY)
+                    $nextSchedule = Carbon::parse($last_schedule->for_date)->next(Carbon::SATURDAY);
+                    
+                if(array_keys($closestDay, min($closestDay))[0] == Carbon::SUNDAY)
+                    $nextSchedule = Carbon::parse($last_schedule->for_date)->next(Carbon::SUNDAY);
+
+                if($end_at != null && !Carbon::parse($end_at)->isToday())
+                {
+                    $schedule = new Schedule([
+                        'schedulable_id' => $this->id,
+                        'schedule_definition_id' => $schedule_definition->id,
+                        'for_date' => $nextSchedule,
+                        'user_id' => $schedule_definition->user_id,
+                        'for_time' => $time
+                    ]);
+                    $this->schedules()->save($schedule);
+                }
+                else
+                {
+                    $schedule = new Schedule([
+                        'schedulable_id' => $this->id,
+                        'schedule_definition_id' => $schedule_definition->id,
+                        'for_date' => $nextSchedule,
+                        'user_id' => $schedule_definition->user_id,
+                        'for_time' => $time
+                    ]);
+                    $this->schedules()->save($schedule);
+                }
+            break;
+                
+            case 3:
+            
+            break;
+        }
     }
     
-    public function accomplishSchedule()
+    public function accomplishSchedule($id)
 	{
-        //Change state to 1
+        $schedule = Schedule::findOrFail($id);
+        $schedule->state = 1;
+        $schedule->ended_at = Carbon::now();
+        $schedule->save();
         
-
         $this->nextSchedule();
 	}
     
-    public function abortSchedule()
+    public function abortSchedule($id)
     {
-        //Change state to -1
-
+        $schedule = Schedule::findOrFail($id);
+        $schedule->state = -1;
+        $schedule->ended_at = Carbon::now();
+        $schedule->save();
+        
         $this->nextSchedule();
     }
 }

@@ -19,14 +19,9 @@ class Schedule_Definition extends Eloquent
         'day24', 'day25', 'day26', 'day27', 'day28', 'day29', 'day30', 'day31',
 	];
     
-    public function schedulable()
-	{
-		return $this->morphTo();
-	}
-    
     public function schedules()
     {
-        return $this->hasMany('SouhailMerroun\Schedulable\Schedule', 'schedule_id' ,'id');
+        return $this->hasMany(Schedule::class, 'schedule_definition_id');
     }
     
     public function scopeForLoggedInUser($query)

@@ -2,6 +2,7 @@
 namespace SouhailMerroun\Schedulable;
 
 use Illuminate\Support\Collection;
+use Carbon\Carbon;
 
 trait Definings
 {
@@ -18,13 +19,13 @@ trait Definings
         
         $schedule = new Schedule([
             'schedulable_id' => $this->id,
-            'schedule_id' => $schedule_definition->id,
+            'schedule_definition_id' => $schedule_definition->id,
             'for_date' => $date,
             'for_time' => $time,
             'user_id' => $userId,
             'time' => $time
         ]);
-        $schedule_definition->schedules()->save($schedule);
+        $this->schedules()->save($schedule);
     }
     
     public function scheduleEveryDay($startDate , $time = null , $endDate = null, $userId = null)
@@ -47,12 +48,12 @@ trait Definings
         $this->schedule_definition()->save($schedule_definition);
         $schedule = new Schedule([
             'schedulable_id' => $this->id,
-            'schedule_id' => $schedule_definition->id,
+            'schedule_definition_id' => $schedule_definition->id,
             'for_date' => $startDate,
             'user_id' => $userId,
             'for_time' => $time
         ]);
-        $schedule_definition->schedules()->save($schedule);
+        $this->schedules()->save($schedule);
     }
     
     public function scheduleEveryGivingDayOfTheWeek($startDate , $time = null , $endDate = null, Collection $days, $userId = null)
@@ -80,6 +81,75 @@ trait Definings
         if($days->contains('sunday'))
             $sunday = true;
             
+        /* Change the schedule start date depending on the schedule definition */
+        if($monday)
+        {
+            if(Carbon::parse($startDate)->dayOfWeek != Carbon::MONDAY)
+                $nextSchedule = Carbon::parse($startDate)->next(Carbon::MONDAY);
+            else
+                $nextSchedule = $startDate;
+        }
+        else
+        {
+            if($tuesday)
+            {
+                if(Carbon::parse($startDate)->dayOfWeek != Carbon::TUESDAY)
+                    $nextSchedule = Carbon::parse($startDate)->next(Carbon::TUESDAY);
+                else
+                    $nextSchedule = $startDate;
+            } 
+            else
+            {
+                if($wednesday)
+                {
+                    if(Carbon::parse($startDate)->dayOfWeek != Carbon::WEDNESDAY)
+                        $nextSchedule = Carbon::parse($startDate)->next(Carbon::WEDNESDAY);
+                    else
+                        $nextSchedule = $startDate;
+                }  
+                else
+                {
+                    if($thursday)
+                    {
+                        if(Carbon::parse($startDate)->dayOfWeek != Carbon::THURSDAY)
+                            $nextSchedule = Carbon::parse($startDate)->next(Carbon::THURSDAY);
+                        else
+                            $nextSchedule = $startDate;
+                    }
+                    else
+                    {
+                        if($friday)
+                        {
+                            if(Carbon::parse($startDate)->dayOfWeek != Carbon::FRIDAY)
+                                $nextSchedule = Carbon::parse($startDate)->next(Carbon::FRIDAY);
+                            else
+                                $nextSchedule = $startDate;
+                        }
+                        else
+                        {
+                            if($saturday)
+                            {
+                                if(Carbon::parse($startDate)->dayOfWeek != Carbon::SATURDAY)
+                                    $nextSchedule = Carbon::parse($startDate)->next(Carbon::SATURDAY);
+                                else
+                                    $nextSchedule = $startDate;
+                            }
+                            else
+                            {
+                                if($sunday)
+                                {
+                                    if(Carbon::parse($startDate)->dayOfWeek != Carbon::SUNDAY)
+                                        $nextSchedule = Carbon::parse($startDate)->next(Carbon::SUNDAY);
+                                    else
+                                        $nextSchedule = $startDate;
+                                }
+                            }
+                        }
+                    }
+                } 
+            }
+        }
+            
         $schedule_definition = new Schedule_Definition([
             'schedulable_id' => $this->id,
             'type' => 2,
@@ -98,12 +168,12 @@ trait Definings
         $this->schedule_definition()->save($schedule_definition);
         $schedule = new Schedule([
             'schedulable_id' => $this->id,
-            'schedule_id' => $schedule_definition->id,
-            'for_date' => $startDate,
+            'schedule_definition_id' => $schedule_definition->id,
+            'for_date' => $nextSchedule,
             'user_id' => $userId,
             'for_time' => $time
         ]);
-        $schedule_definition->schedules()->save($schedule);
+        $this->schedules()->save($schedule);
     }
     
     public function scheduleEveryGivingDayOfTheMonth($startDate , $time = null , $endDate = null, Collection $months, Collection $days, $userId = null)
@@ -295,11 +365,11 @@ trait Definings
         $this->schedule_definition()->save($schedule_definition);
         $schedule = new Schedule([
             'schedulable_id' => $this->id,
-            'schedule_id' => $schedule_definition->id,
+            'schedule_definition_id' => $schedule_definition->id,
             'for_date' => $startDate,
             'user_id' => $userId,
             'for_time' => $time
         ]);
-        $schedule_definition->schedules()->save($schedule);
+        $this->schedules()->save($schedule);
     }
 }

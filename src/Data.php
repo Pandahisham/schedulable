@@ -2,12 +2,32 @@
 namespace SouhailMerroun\Schedulable;
 
 use SouhailMerroun\Schedulable\Schedule;
+use Illuminate\Support\Collection;
+use Carbon\Carbon;
 
 trait Data
 {
-    public function getPendingSchedules()
+    public $notScheduled;
+    public $upComming;
+    
+    public function isScheduledOnce()
     {
-        return $this->schedules()->whereNull('state')->whereNull('ended_at')->get();
+        return $this->schedule_definition()->where('type', 0)->first();
+    }
+    
+    public function isScheduledEveryday()
+    {
+        return $this->schedule_definition()->where('type', 1)->first();
+    }
+    
+    public function isScheduledEveryGivingDay()
+    {
+        return $this->schedule_definition()->where('type', 2)->first();
+    }
+    
+    public function isScheduledEveryGivingDayMonth()
+    {
+        return $this->schedule_definition()->where('type', 3)->first();
     }
     
     public function getAccomplishedSchedules()
