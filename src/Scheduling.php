@@ -6,8 +6,22 @@ use Carbon\Carbon;
 
 trait Scheduling
 {
-    public function firstSchedule($request)
+    private function validate($request)
     {
+        /* Cannot have a timed scheduled with no date */
+        if(empty($request->input('start_at')) && !empty($request->input('time')))
+            throw new Exception("Cannot have a timed schedule with no date");
+        
+        /* Required start date for every-day, every-giving-day and every-givin-day-month */
+        if($request->input('schedule_type') == 'every-day' || $request->input('schedule_type') == 'every-giving-day' || $request->input('schedule_type') == 'every-giving-day-month')
+            if(empty($request->input('start_at')))
+                throw new Exception("Required start date");
+    }
+    
+    public function firstSchedule($request, $user_id = null)
+    {
+        $this->validate($request);
+        
         switch ($request->input('schedule_type')) 
         {
             case 'once':
@@ -18,12 +32,12 @@ trait Scheduling
                 }
                 else
                 {
-                    $with_time = null;
                     $time = empty($request->input('time')) ? null : $request->input('time');
+                    $with_time = null;
                 }
 
                 $start_at = empty($request->input('start_at')) ? null : $request->input('start_at');
-                $this->scheduleOnce($start_at, $time, $with_time);
+                $this->scheduleOnce($start_at, $time, $with_time, $user_id);
             break;
             
             case 'every-day':
@@ -40,7 +54,7 @@ trait Scheduling
 
                 $end_at = empty($request->input('end_at')) ? null : $request->input('end_at');
                 
-                $this->scheduleEveryDay($request->input('start_at'), $time, $end_at, $with_time);               
+                $this->scheduleEveryDay($request->input('start_at'), $time, $end_at, $with_time, $user_id);               
             break;
                 
             case 'every-giving-day':
@@ -64,7 +78,7 @@ trait Scheduling
                 foreach ($days_list as $day) 
                     $days->push($request->input($day));
 
-                $this->scheduleEveryGivingDayOfTheWeek($request->input('start_at'), $time, $end_at, $days, $with_time);
+                $this->scheduleEveryGivingDayOfTheWeek($request->input('start_at'), $time, $end_at, $days, $with_time, $user_id);
             break;
                 
             case 'every-giving-day-month':
@@ -95,7 +109,7 @@ trait Scheduling
                 foreach($days_list as $day) 
                     $days->push($request->input($day));
                 
-                $this->scheduleEveryGivingDayOfTheMonth($request->input('start_at'), $time, $end_at, $months, $days, $with_time);
+                $this->scheduleEveryGivingDayOfTheMonth($request->input('start_at'), $time, $end_at, $months, $days, $with_time, $user_id);
             break;
         }
     }
@@ -116,7 +130,7 @@ trait Scheduling
                 $end_at = empty($schedule_definition->end_at) ? null : $schedule_definition->end_at;
                 $last_schedule = Schedule::orderBy('ended_at', 'desc')->first();
                 
-                if($end_at != null && !Carbon::parse($end_at)->isToday())
+                if($last_schedule->for_date != $end_at)
                 {
                     $schedule = new Schedule([
                         'schedulable_id' => $this->id,
@@ -129,15 +143,9 @@ trait Scheduling
                 }
                 else
                 {
-                    $schedule = new Schedule([
-                        'schedulable_id' => $this->id,
-                        'schedule_definition_id' => $schedule_definition->id,
-                        'for_date' => Carbon::parse($last_schedule->for_date)->addDay(),
-                        'user_id' => $schedule_definition->user_id,
-                        'for_time' => $time
-                    ]);
-                    $this->schedules()->save($schedule);
+                    dd('finish');
                 }
+                
             break;
                 
             //Every giving day of the week

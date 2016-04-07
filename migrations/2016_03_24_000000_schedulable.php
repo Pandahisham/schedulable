@@ -23,6 +23,7 @@ class Schedulable extends Migration
             
             $table->date('date')->nullable();
             $table->date('start_at')->nullable();
+            $table->datetime('ended_at')->nullable(); // Store the date if abandonned or accomplished
             $table->date('end_at')->nullable();
             $table->time('time')->nullable(); 
             $table->boolean('with_time')->nullable();
@@ -79,8 +80,6 @@ class Schedulable extends Migration
             $table->boolean('day29')->nullable();
             $table->boolean('day30')->nullable();
             $table->boolean('day31')->nullable();
-           
-            $table->timestamps();
 		});
         
         Schema::create('schedules', function(Blueprint $table) { 
@@ -91,7 +90,6 @@ class Schedulable extends Migration
             $table->integer('schedule_definition_id')->unsigned();
             $table->integer('user_id')->unsigned()->nullable();
             
-            $table->boolean('state')->nullable(); //-1 Aborted, 1 accomplished
             $table->date('for_date')->nullable();
             $table->time('for_time')->nullable();
             $table->datetime('ended_at')->nullable(); // Store the date if abandonned or accomplished 
