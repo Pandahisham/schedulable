@@ -11,24 +11,50 @@ trait Scheduling
         switch ($request->input('schedule_type')) 
         {
             case 'once':
-                $time = empty($request->input('time')) ? null : $request->input('time');
+                if($request->input('with_time'))
+                {
+                    $time = null;
+                    $with_time = true;
+                }
+                else
+                {
+                    $with_time = null;
+                    $time = empty($request->input('time')) ? null : $request->input('time');
+                }
+
                 $start_at = empty($request->input('start_at')) ? null : $request->input('start_at');
-                $this->scheduleOnce($start_at, $time);
+                $this->scheduleOnce($start_at, $time, $with_time);
             break;
             
             case 'every-day':
-                if(empty($request->input('start_at')))
-                    throw new Exception("Empty start_at field in the request");
-            
-                $time = empty($request->input('time')) ? null : $request->input('time');
+                if($request->input('with_time'))
+                {
+                    $time = null;
+                    $with_time = true;
+                }
+                else
+                {
+                    $with_time = null;
+                    $time = empty($request->input('time')) ? null : $request->input('time');
+                }
+
                 $end_at = empty($request->input('end_at')) ? null : $request->input('end_at');
                 
-                $this->scheduleEveryDay($request->input('start_at'), $time, $end_at);               
+                $this->scheduleEveryDay($request->input('start_at'), $time, $end_at, $with_time);               
             break;
                 
             case 'every-giving-day':
-            
-                $time = empty($request->input('time')) ? null : $request->input('time');
+                if($request->input('with_time'))
+                {
+                    $time = null;
+                    $with_time = true;
+                }
+                else
+                {
+                    $with_time = null;
+                    $time = empty($request->input('time')) ? null : $request->input('time');
+                }
+
                 $end_at = empty($request->input('end_at')) ? null : $request->input('end_at');
             
                 $days = collect();
@@ -38,12 +64,21 @@ trait Scheduling
                 foreach ($days_list as $day) 
                     $days->push($request->input($day));
 
-                $this->scheduleEveryGivingDayOfTheWeek($request->input('start_at'), $time, $end_at, $days);
+                $this->scheduleEveryGivingDayOfTheWeek($request->input('start_at'), $time, $end_at, $days, $with_time);
             break;
                 
             case 'every-giving-day-month':
-            
-                $time = empty($request->input('time')) ? null : $request->input('time');
+                if($request->input('with_time'))
+                {
+                    $time = null;
+                    $with_time = true;
+                }
+                else
+                {
+                    $with_time = null;
+                    $time = empty($request->input('time')) ? null : $request->input('time');
+                }
+
                 $end_at = empty($request->input('end_at')) ? null : $request->input('end_at');
             
                 $months = collect();
@@ -60,7 +95,7 @@ trait Scheduling
                 foreach($days_list as $day) 
                     $days->push($request->input($day));
                 
-                $this->scheduleEveryGivingDayOfTheMonth($request->input('start_at'), $time, $end_at, $months, $days);
+                $this->scheduleEveryGivingDayOfTheMonth($request->input('start_at'), $time, $end_at, $months, $days, $with_time);
             break;
         }
     }

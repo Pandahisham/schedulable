@@ -25,6 +25,7 @@ class Schedulable extends Migration
             $table->date('start_at')->nullable();
             $table->date('end_at')->nullable();
             $table->time('time')->nullable(); 
+            $table->boolean('with_time')->nullable();
             
             $table->boolean('monday')->nullable();
             $table->boolean('tuesday')->nullable();

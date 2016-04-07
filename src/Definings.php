@@ -6,14 +6,15 @@ use Carbon\Carbon;
 
 trait Definings
 {
-    public function scheduleOnce($date, $time = null, $userId = null)
+    public function scheduleOnce($date, $time = null, $with_time = null, $userId = null)
     {
         $schedule_definition = new Schedule_Definition([
             'schedulable_id' => $this->id,
             'type' => 0,
             'user_id' => $userId,
             'date' => $date,
-            'time' => $time
+            'time' => $time,
+            'with_time' => $with_time
         ]);
         $this->schedule_definition()->save($schedule_definition);
         
@@ -28,7 +29,7 @@ trait Definings
         $this->schedules()->save($schedule);
     }
     
-    public function scheduleEveryDay($startDate , $time = null , $endDate = null, $userId = null)
+    public function scheduleEveryDay($startDate , $time = null , $endDate = null, $with_time = null ,$userId = null)
     {
         $schedule_definition = new Schedule_Definition([
             'schedulable_id' => $this->id,
@@ -43,7 +44,8 @@ trait Definings
             'thursday' => true,
             'friday' => true,
             'saturday' => true,
-            'sunday' => true
+            'sunday' => true,
+            'with_time' => $with_time
         ]);
         $this->schedule_definition()->save($schedule_definition);
         $schedule = new Schedule([
@@ -56,7 +58,7 @@ trait Definings
         $this->schedules()->save($schedule);
     }
     
-    public function scheduleEveryGivingDayOfTheWeek($startDate , $time = null , $endDate = null, Collection $days, $userId = null)
+    public function scheduleEveryGivingDayOfTheWeek($startDate , $time = null , $endDate = null, Collection $days, $with_time = null ,$userId = null)
     {
         $monday = false;
         $tuesday = false;
@@ -163,7 +165,8 @@ trait Definings
             'thursday' => $thursday,
             'friday' => $friday,
             'saturday' => $saturday,
-            'sunday' => $sunday
+            'sunday' => $sunday,
+            'with_time' => $with_time
         ]);
         $this->schedule_definition()->save($schedule_definition);
         $schedule = new Schedule([
@@ -176,7 +179,7 @@ trait Definings
         $this->schedules()->save($schedule);
     }
     
-    public function scheduleEveryGivingDayOfTheMonth($startDate , $time = null , $endDate = null, Collection $months, Collection $days, $userId = null)
+    public function scheduleEveryGivingDayOfTheMonth($startDate , $time = null , $endDate = null, Collection $months, Collection $days, $with_time = null ,$userId = null)
     {
         $january = false;
         $february = false;
@@ -311,6 +314,11 @@ trait Definings
         if($days->contains(31))
             $day31 = true;
             
+        if($janvier)
+        {
+            
+        }
+            
         $schedule_definition = new Schedule_Definition([
             'schedulable_id' => $this->id,
             'type' => 3,
@@ -360,7 +368,8 @@ trait Definings
             'day28' => $day28,
             'day29' => $day29,
             'day30' => $day30,
-            'day31' => $day31
+            'day31' => $day31,
+            'with_time' => $with_time
         ]);
         $this->schedule_definition()->save($schedule_definition);
         $schedule = new Schedule([
